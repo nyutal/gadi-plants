@@ -37,7 +37,7 @@ print(f"posts: {len(posts)}")
 
 # --- gather URL maps (later files win) ---
 url_map = {}
-for name in ["cdn_batch1.json", "cdn_batch3_ok.json", "cdn_batch4_ok.json", "cdn_batch5_ok.json"]:
+for name in ["cdn_batch1.json", "cdn_batch3_ok.json", "cdn_batch4_ok.json", "cdn_batch5_ok.json", "cdn_batch6_ok.json", "cdn_batch7_ok.json", "cdn_batch8_ok.json", "cdn_batch9_ok.json", "cdn_batch10_ok.json", "cdn_batch11_ok.json", "cdn_batch12_ok.json"]:
     f = ROOT / name
     if f.exists():
         url_map.update(json.load(open(f)))
