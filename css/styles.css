@@ -2,6 +2,7 @@
    Theme tokens live in :root; layout is mobile-first, fully RTL. */
 
 :root {
+  color-scheme: light;       /* opt out of browser auto-dark: it was washing the text out */
   --green: #1e5b34;          /* timeline spine + accents */
   --green-dark: #144226;
   --paper: #f7f5ee;          /* page background */
