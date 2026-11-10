@@ -14,7 +14,12 @@ site/
 ├── css/
 │   └── styles.css    All styling; theme tokens in :root
 ├── js/
-│   └── app.js        All rendering logic (vanilla JS)
+│   ├── app.js        Entry point: chrome wiring (tabs, back, swipe) + boot
+│   ├── core.js       Shared state, helpers and card renderers
+│   ├── year.js       Year view (month tiles)
+│   ├── month.js      Month view (post timeline)
+│   ├── plant-index.js  Plant index view (A–ב)
+│   └── plant.js      Single-plant view
 ├── data/
 │   └── posts.json    GENERATED — the posts data (see schema below)
 └── images/
