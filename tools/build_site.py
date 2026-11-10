@@ -27,7 +27,7 @@ DATA_DIR = SITE / "data"
 IMG_DIR.mkdir(parents=True, exist_ok=True)
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-YEARS = [2022, 2023, 2024, 2025, 2026]
+YEARS = [2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026]
 
 posts = []
 for y in YEARS:
