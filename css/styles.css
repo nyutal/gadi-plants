@@ -147,6 +147,63 @@ button.card-btn:focus-visible, .tab:focus-visible, .back-btn:focus-visible {
 .plant-row .p-meta { color: var(--ink-soft); font-size: .85rem; white-space: nowrap; }
 .loading, .empty { text-align: center; color: var(--ink-soft); padding: 30px 0; }
 
+/* ---------- post cards open the gallery ---------- */
+.card[data-gallery] { cursor: pointer; }
+.card[data-gallery]:hover { box-shadow: 0 4px 14px rgba(20,66,38,.16); }
+.card[data-gallery]:focus-visible { outline: 3px solid var(--green); outline-offset: 2px; }
+.card-links {
+  display: flex; justify-content: space-between; align-items: center;
+  margin: 8px 0 0;
+}
+.gallery-hint { color: var(--green); font-weight: 600; font-size: .88rem; }
+
+/* ---------- gallery popup ---------- */
+.gallery-overlay {
+  position: fixed; inset: 0; z-index: 90;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(18, 30, 18, .55);
+  backdrop-filter: blur(10px) saturate(1.1);
+  -webkit-backdrop-filter: blur(10px) saturate(1.1);
+  padding: 14px;
+}
+.gallery-overlay[hidden] { display: none; }
+.gallery-frame { position: relative; width: min(960px, 96vw); }
+.g-stage {
+  background: rgba(10, 18, 10, .88); border-radius: 16px;
+  min-height: 52vh; max-height: 78vh;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; box-shadow: 0 18px 50px rgba(0,0,0,.45);
+}
+.g-img { display: block; max-width: 100%; max-height: 78vh; object-fit: contain; }
+.g-empty { text-align: center; color: #dcead8; padding: 34px 20px; }
+.g-empty-icon { font-size: 3rem; margin-bottom: 8px; }
+.g-empty p { margin: 0; font-size: 1rem; }
+.g-bar {
+  display: flex; gap: 12px; align-items: baseline;
+  padding: 10px 6px 0; color: #fff;
+  text-shadow: 0 1px 6px rgba(0,0,0,.6);
+}
+.g-counter { font-weight: 700; white-space: nowrap; font-size: .92rem; }
+.g-caption { margin: 0; font-size: .95rem; line-height: 1.5; white-space: pre-line; }
+.g-btn {
+  border: 0; cursor: pointer; font: inherit;
+  background: rgba(255,255,255,.94); color: var(--green-dark);
+  border-radius: 50%; box-shadow: 0 4px 14px rgba(0,0,0,.35);
+  display: flex; align-items: center; justify-content: center;
+}
+.g-btn:focus-visible { outline: 3px solid var(--green); outline-offset: 2px; }
+.g-close {
+  position: absolute; top: -12px; inset-inline-end: -4px; z-index: 2;
+  width: 38px; height: 38px; font-size: 1rem; font-weight: 700;
+}
+.g-nav {
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
+  width: 46px; height: 46px; font-size: 1.7rem; line-height: 1;
+}
+.g-nav[hidden] { display: none; }
+.g-prev { inset-inline-start: 8px; }  /* RTL: previous sits on the right */
+.g-next { inset-inline-end: 8px; }    /* RTL: next sits on the left */
+
 @media (min-width: 720px) {
   .card img.thumb { height: 260px; }
   .site-header h1 { font-size: 2rem; }

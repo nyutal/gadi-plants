@@ -8,6 +8,7 @@
 import { state, app, backBtn, tabTimeline, tabIndex } from "./core.js";
 import { renderYear } from "./year.js";
 import { renderIndex } from "./plant-index.js";
+import { initGallery } from "./gallery.js";
 
 /* ---------------- chrome: tabs, back button, swipe ---------------- */
 
@@ -26,6 +27,7 @@ document.addEventListener("touchstart", (e) => {
   touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
 }, { passive: true });
 document.addEventListener("touchend", (e) => {
+  if (e.target.closest && e.target.closest(".gallery-overlay")) return; // gallery handles its own swipes
   if (!touchStart || !(state.view === "month" || state.view === "plant")) return;
   const dx = e.changedTouches[0].clientX - touchStart.x;
   const dy = Math.abs(e.changedTouches[0].clientY - touchStart.y);
@@ -37,5 +39,5 @@ document.addEventListener("touchend", (e) => {
 
 fetch("data/posts.json")
   .then((r) => r.json())
-  .then((posts) => { state.posts = posts; renderYear(); })
+  .then((posts) => { state.posts = posts; renderYear(); initGallery(); })
   .catch(() => { app.innerHTML = `<p class="empty">שגיאה בטעינת הנתונים</p>`; });

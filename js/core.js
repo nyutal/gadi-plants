@@ -6,6 +6,14 @@
 export const MONTHS_FULL = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
 export const MONTHS_ABBR = ["ינו׳","פבר׳","מרץ","אפר׳","מאי","יוני","יולי","אוג׳","ספט׳","אוק׳","נוב׳","דצמ׳"];
 
+/* Full photo galleries live on the droplet, not in this package (only the
+   one thumbnail per post is here). Gallery photos are served from
+   `${GALLERY_BASE}/galleries/<post_id>/NN.jpg`, and the gallery index
+   (photo lists + per-photo captions, keyed by post id) from
+   `${GALLERY_BASE}/galleries/galleries.json`. If the droplet is
+   unreachable the site works as before, with empty galleries. */
+export const GALLERY_BASE = "https://gadi-plants.duckdns.org";
+
 export const state = {
   posts: [],
   view: "year",        // year | month | index | plant
@@ -13,6 +21,7 @@ export const state = {
   plant: null,         // plant name when view === "plant"
   spanByYear: false,   // month view: group posts by year
   indexMonth: 0,       // index filter: 0 = whole year, else 1..12
+  galleries: undefined, // gallery index: undefined = not fetched yet, null = unavailable, else {postId: entry}
 };
 
 export const app = document.getElementById("app");
@@ -74,13 +83,16 @@ export function postCardHtml(p) {
     <div class="tl-row">
       <div class="tl-gutter date-label">${dayOf(p)} ${MONTHS_ABBR[p.month - 1]}</div>
       <div class="tl-card">
-        <article class="card">
+        <article class="card" data-gallery="${esc(p.id)}" tabindex="0" aria-label="פתיחת גלריית התמונות של הפוסט">
           ${thumbHtml(p, p.plants[0] || "")}
           <div class="card-body tl-text">
             <span class="tl-dot" aria-hidden="true"></span>
             ${names ? `<div class="chips">${names}</div>` : ""}
             <p class="caption">${esc(p.caption)}</p>
-            <p><a class="post-link" href="${esc(p.url)}" target="_blank" rel="noopener">לפוסט בפייסבוק</a></p>
+            <p class="card-links">
+              <a class="post-link" href="${esc(p.url)}" target="_blank" rel="noopener">לפוסט בפייסבוק</a>
+              <span class="gallery-hint" aria-hidden="true">📷 גלריה</span>
+            </p>
           </div>
         </article>
       </div>
