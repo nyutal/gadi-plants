@@ -76,17 +76,39 @@ The blob is published in two places, for two different purposes:
    package** so they can never drift apart. One server requirement: the
    JSON fetch is cross-origin, so `galleries.json` must be served with
    an `Access-Control-Allow-Origin` header (plain photo loads via
-   `<img>` do not need CORS). With nginx, that is an exact-match
-   location inside the server block that serves the galleries,
-   followed by `nginx -t` and a reload:
+   `<img>` do not need CORS).
+
+   **Where exactly (nginx):** edit the site's own config file — its
+   file in `/etc/nginx/sites-available/`, enabled by a symlink in
+   `sites-enabled/` (never another site's file). Inside that file, use
+   the `server { … }` block that actually serves the site over HTTPS —
+   the one holding the site's `root`. A redirect-only block or a by-IP
+   test listener does not need it. Add the location **inside** that
+   server block, as a sibling of the existing `location /` block, not
+   nested inside it:
 
    ```nginx
-   location = /galleries/galleries.json {
-       add_header Access-Control-Allow-Origin *;
+   server {
+       listen 443 ssl;
+       server_name <gallery-host>;
+
+       root /path/to/the/site;
+       index index.html;
+
+       location / {
+           try_files $uri $uri/ =404;
+       }
+
+       location = /galleries/galleries.json {
+           add_header Access-Control-Allow-Origin *;
+       }
+
+       # ... the ssl_certificate lines (e.g. added by Certbot) stay as they are
    }
    ```
 
-   Only the index file needs the header, and `*` is fine — the data is
+   Then test and reload: `nginx -t && systemctl reload nginx`. Only
+   the index file needs the header, and `*` is fine — the data is
    public and read-only. It is safe to add before the `galleries/`
    folder exists on the host; on another server, set the equivalent
    header for that one path.
