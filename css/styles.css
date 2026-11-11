@@ -73,11 +73,24 @@ body {
      on the spine. From the row's right edge the spine centre is
      var(--spine-x) minus the 14px timeline padding; the right offset
      puts the dot's right edge half a dot before that centre */
-  position: absolute; top: 50%; transform: translateY(-50%);
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: 0;
   right: calc(var(--spine-x) - 14px - 10px);
   width: 20px; height: 20px; border-radius: 50%;
   background: var(--green); border: 3px solid #fff;
   box-shadow: 0 1px 5px rgba(20,66,38,.45);
+}
+.tl-row::after {                /* short connector line from the dot to its card */
+  /* painted from the row, not from the dot: a child of the dot — even with
+     a negative z-index — still paints over the dot's own border (the white
+     ring), because a stacking context paints the parent's background and
+     border first. From the row, with z-index: -1, the line passes under
+     the dot, its ring, and the card. */
+  content: ""; position: absolute; z-index: -1;
+  top: 50%; transform: translateY(-50%);
+  right: calc(var(--spine-x) - 14px);   /* starts at the spine centre (under the dot) */
+  width: 32px;                          /* spine centre to the card's edge */
+  height: 2px; border-radius: 2px;
+  background: var(--green); opacity: .45;         /* softer than the 3px spine */
 }
 
 /* ---------- cards ---------- */
