@@ -82,11 +82,11 @@ export function postCardHtml(p) {
   return `
     <div class="tl-row">
       <div class="tl-gutter date-label">${dayOf(p)} ${MONTHS_ABBR[p.month - 1]}</div>
+      <span class="tl-dot" aria-hidden="true"></span>
       <div class="tl-card">
         <article class="card" data-gallery="${esc(p.id)}" tabindex="0" aria-label="פתיחת גלריית התמונות של הפוסט">
           ${thumbHtml(p, p.plants[0] || "")}
-          <div class="card-body tl-text">
-            <span class="tl-dot" aria-hidden="true"></span>
+          <div class="card-body">
             ${names ? `<div class="chips">${names}</div>` : ""}
             <p class="caption">${esc(p.caption)}</p>
             <p class="card-links">

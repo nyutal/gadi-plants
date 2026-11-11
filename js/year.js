@@ -13,12 +13,12 @@ export function renderYear() {
     rows.push(`
       <div class="tl-row">
         <div class="tl-gutter">${MONTHS_FULL[m - 1]}</div>
+        <span class="tl-dot" aria-hidden="true"></span>
         <div class="tl-card">
           <button class="card-btn" type="button" data-month="${m}" aria-label="${MONTHS_FULL[m - 1]} — ${posts.length} פוסטים">
             <article class="card">
               ${thumbHtml(rep, rep.plants[0] || MONTHS_FULL[m - 1])}
-              <div class="card-body tl-text">
-                <span class="tl-dot" aria-hidden="true"></span>
+              <div class="card-body">
                 <h3>${MONTHS_FULL[m - 1]}<span class="count-pill">${posts.length}</span></h3>
                 ${chipsHtml(posts)}
               </div>
