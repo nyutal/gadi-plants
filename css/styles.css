@@ -12,7 +12,7 @@
   --chip: #e7efe2;           /* plant tag chip background */
   --line: #d9dccd;
   --radius: 14px;
-  --spine-x: 68px;           /* distance of the spine centre from the right edge */
+  --spine-x: 72px;           /* distance of the spine centre from the right edge */
 }
 
 * { box-sizing: border-box; }
@@ -58,9 +58,12 @@ body {
   background: var(--green); border-radius: 2px;
 }
 .tl-row { position: relative; padding: 10px 0; }
-.tl-gutter {                  /* month name / date label, left of the spine */
+.tl-gutter {                  /* month name / date label, in the strip right of the spine */
   position: absolute; right: 0; top: 50%; transform: translateY(-50%);
-  width: calc(var(--spine-x) - 16px); text-align: left;
+  /* the strip ends 16px before the spine centre, which leaves a 6px gap
+     to the dot's edge (the dot is 20px wide, centred on the spine, and
+     now shares the label's line) — so no label can slide under the dot */
+  width: calc(var(--spine-x) - 30px); text-align: left;
   font-weight: 700; color: var(--green-dark); font-size: .95rem;
 }
 .tl-card { margin-right: calc(var(--spine-x) + 18px); position: relative; }
