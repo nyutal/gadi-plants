@@ -3,6 +3,8 @@
 
 :root {
   color-scheme: light;       /* opt out of browser auto-dark: it was washing the text out */
+  color-scheme: only light;  /* the "only" keyword is the real opt-out: plain "light" does not
+                                stop forced darkening (Chrome auto-dark, in-app browsers) */
   --green: #1e5b34;          /* timeline spine + accents */
   --green-dark: #144226;
   --paper: #f7f5ee;          /* page background */
@@ -90,9 +92,7 @@ body {
   right: calc(var(--spine-x) - 14px);   /* starts at the spine centre (under the dot) */
   width: 32px;                          /* spine centre to the card's edge */
   height: 2px; border-radius: 2px;
-  background: var(--green); opacity: .9;          /* nearly full strength: at 45% the deep green
-                                                     blended with the cream paper into a pale sage
-                                                     that was effectively invisible */
+  background: var(--green); opacity: .45;         /* softer than the 3px spine */
 }
 
 /* ---------- cards ---------- */
