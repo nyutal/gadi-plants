@@ -76,7 +76,20 @@ The blob is published in two places, for two different purposes:
    package** so they can never drift apart. One server requirement: the
    JSON fetch is cross-origin, so `galleries.json` must be served with
    an `Access-Control-Allow-Origin` header (plain photo loads via
-   `<img>` do not need CORS).
+   `<img>` do not need CORS). With nginx, that is an exact-match
+   location inside the server block that serves the galleries,
+   followed by `nginx -t` and a reload:
+
+   ```nginx
+   location = /galleries/galleries.json {
+       add_header Access-Control-Allow-Origin *;
+   }
+   ```
+
+   Only the index file needs the header, and `*` is fine — the data is
+   public and read-only. It is safe to add before the `galleries/`
+   folder exists on the host; on another server, set the equivalent
+   header for that one path.
 
 Then verify:
 

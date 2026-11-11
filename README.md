@@ -91,8 +91,22 @@ They are hosted on the droplet and linked from here:
   "captions": { "01.jpg": "…", … } } }`. The index is generated from the
   collection manifest and uploaded to the droplet together with the photos,
   so the two can never drift apart.
-- The droplet's nginx must send `Access-Control-Allow-Origin` for
-  `galleries.json` (plain `<img>` loads need no CORS; the JSON fetch does).
+- The gallery host's web server must send `Access-Control-Allow-Origin`
+  for `galleries.json` (plain `<img>` loads need no CORS; the JSON fetch
+  does). With nginx, add an exact-match location inside the server block
+  that serves the galleries, then test and reload
+  (`nginx -t`, `systemctl reload nginx`):
+
+  ```nginx
+  location = /galleries/galleries.json {
+      add_header Access-Control-Allow-Origin *;
+  }
+  ```
+
+  Only the index file needs the header, and `*` is fine — the data is
+  public and read-only. It is safe to add before the `galleries/` folder
+  exists on the host; on another server, set the equivalent header for
+  that one path.
 - If the droplet is unreachable, or a post has no index entry yet, the
   popup opens with an empty state and the rest of the site is unaffected.
   Moving `posts.json` itself to the droplet was rejected on purpose: the
