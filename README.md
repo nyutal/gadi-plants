@@ -19,7 +19,8 @@ site/
 │   ├── year.js       Year view (month tiles)
 │   ├── month.js      Month view (post timeline)
 │   ├── plant-index.js  Plant index view (A–ב)
-│   └── plant.js      Single-plant view
+│   ├── plant.js      Single-plant view
+│   └── gallery.js    Gallery popup (lightbox) for a post's full photo set
 ├── data/
 │   └── posts.json    GENERATED — the posts data (see schema below)
 └── images/
@@ -68,6 +69,34 @@ One object per post, sorted by date:
 | `plants`  | string[]       | canonical Hebrew plant names             |
 | `url`     | string         | link to the original Facebook post       |
 | `image`   | string \| null | `images/<id>.jpg`, or null → placeholder |
+
+## Galleries
+
+Clicking a post card (anywhere except the "לפוסט בפייסבוק" link) opens the
+post's full photo gallery as a popup over the blurred site: one large photo
+at a time, its caption below, prev/next by buttons, arrow keys and swipe.
+The popup is deep-linkable — `#/gallery/<post_id>/<n>` — and the browser
+Back button closes it.
+
+The gallery photos are **not** in this package (a full set is ~40 photos
+per post; only the single representative thumbnail is, under `images/`).
+They are hosted on the droplet and linked from here:
+
+- Base URL: the `GALLERY_BASE` constant in `js/core.js`
+  (currently `https://gadi-plants.duckdns.org`).
+- Photo URL: `<base>/galleries/<post_id>/NN.jpg` — the pointer is derived
+  from the post's own id; nothing else needs to be kept in sync.
+- Index: the app fetches `<base>/galleries/galleries.json` lazily on first
+  open. Shape: `{ "<post_id>": { "photo_count": N, "files": ["01.jpg", …],
+  "captions": { "01.jpg": "…", … } } }`. The index is generated from the
+  collection manifest and uploaded to the droplet together with the photos,
+  so the two can never drift apart.
+- The droplet's nginx must send `Access-Control-Allow-Origin` for
+  `galleries.json` (plain `<img>` loads need no CORS; the JSON fetch does).
+- If the droplet is unreachable, or a post has no index entry yet, the
+  popup opens with an empty state and the rest of the site is unaffected.
+  Moving `posts.json` itself to the droplet was rejected on purpose: the
+  timeline must keep working even where/when the droplet cannot be reached.
 
 ## Design notes (keep these intact when editing)
 
