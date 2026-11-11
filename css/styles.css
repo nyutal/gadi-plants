@@ -73,11 +73,19 @@ body {
      on the spine. From the row's right edge the spine centre is
      var(--spine-x) minus the 14px timeline padding; the right offset
      puts the dot's right edge half a dot before that centre */
-  position: absolute; top: 50%; transform: translateY(-50%);
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: 0;
   right: calc(var(--spine-x) - 14px - 10px);
   width: 20px; height: 20px; border-radius: 50%;
   background: var(--green); border: 3px solid #fff;
   box-shadow: 0 1px 5px rgba(20,66,38,.45);
+}
+.tl-dot::after {                /* short connector line from the dot to its card */
+  content: ""; position: absolute; z-index: -1;   /* tucks under the dot itself */
+  top: 50%; transform: translateY(-50%);
+  right: 50%;                   /* starts at the dot's centre, hidden under it */
+  width: 32px;                  /* half the dot (10px) + the 22px gap to the card's edge */
+  height: 2px; border-radius: 2px;
+  background: var(--green); opacity: .45;         /* softer than the 3px spine */
 }
 
 /* ---------- cards ---------- */
