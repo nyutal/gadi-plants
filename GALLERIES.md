@@ -91,6 +91,69 @@ The blob is published in two places, for two different purposes:
    folder exists on the host; on another server, set the equivalent
    header for that one path.
 
+### Deploying a blob on the host — step by step
+
+Run these on the gallery host, in the web-root folder that the
+`GALLERY_BASE` origin serves (the folder that will contain
+`galleries/`). The example uses the `galleries-2026-early` release;
+for a later blob, substitute its tag and file name.
+
+1. **Download the release asset.** The repo is public, so no login is
+   needed. A release asset downloads from
+   `https://github.com/<owner>/<repo>/releases/download/<tag>/<asset>`:
+
+   ```bash
+   wget https://github.com/nyutal/gadi-plants/releases/download/galleries-2026-early/galleries-2026-early.zip
+   ls -lh galleries-2026-early.zip
+   ```
+
+   Any HTTP client works; with python3 alone:
+
+   ```bash
+   python3 -c "import urllib.request; urllib.request.urlretrieve('https://github.com/nyutal/gadi-plants/releases/download/galleries-2026-early/galleries-2026-early.zip','galleries-2026-early.zip')"
+   ```
+
+2. **Verify the download** against the SHA-256 recorded in the release
+   notes. If it does not match, delete the file and download again —
+   do not unpack a bad copy:
+
+   ```bash
+   sha256sum galleries-2026-early.zip
+   ```
+
+3. **When replacing an older blob**, remove the old folder first so
+   nothing stale survives the swap:
+
+   ```bash
+   rm -rf galleries
+   ```
+
+4. **Unpack.** The zip's top-level folder is `galleries/`, so it lands
+   exactly where the host serves it from:
+
+   ```bash
+   python3 -m zipfile -e galleries-2026-early.zip .
+   # or, if unzip is installed:  unzip galleries-2026-early.zip
+   ```
+
+5. **Verify the contents** — the index plus one folder per post, and
+   the photo count from the release notes:
+
+   ```bash
+   ls galleries/
+   find galleries -name '*.jpg' | wc -l
+   ```
+
+6. **Make sure the CORS header is in place** (the nginx location
+   above), with `nginx -t` and a reload after any change.
+
+7. **Clean up.** The release itself is the archive of record, so the
+   zip does not need to stay on the host:
+
+   ```bash
+   rm galleries-2026-early.zip
+   ```
+
 Then verify:
 
 - `<GALLERY_BASE>/galleries/galleries.json` returns 200 with the CORS
