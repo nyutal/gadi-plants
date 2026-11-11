@@ -79,11 +79,16 @@ body {
   background: var(--green); border: 3px solid #fff;
   box-shadow: 0 1px 5px rgba(20,66,38,.45);
 }
-.tl-dot::after {                /* short connector line from the dot to its card */
-  content: ""; position: absolute; z-index: -1;   /* tucks under the dot itself */
+.tl-row::after {                /* short connector line from the dot to its card */
+  /* painted from the row, not from the dot: a child of the dot — even with
+     a negative z-index — still paints over the dot's own border (the white
+     ring), because a stacking context paints the parent's background and
+     border first. From the row, with z-index: -1, the line passes under
+     the dot, its ring, and the card. */
+  content: ""; position: absolute; z-index: -1;
   top: 50%; transform: translateY(-50%);
-  right: 50%;                   /* starts at the dot's centre, hidden under it */
-  width: 32px;                  /* half the dot (10px) + the 22px gap to the card's edge */
+  right: calc(var(--spine-x) - 14px);   /* starts at the spine centre (under the dot) */
+  width: 32px;                          /* spine centre to the card's edge */
   height: 2px; border-radius: 2px;
   background: var(--green); opacity: .45;         /* softer than the 3px spine */
 }
