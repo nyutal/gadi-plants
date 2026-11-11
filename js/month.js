@@ -1,11 +1,17 @@
 /* Month view: one month's posts on its own timeline,
    with the span-by-year toggle. */
 
-import { MONTHS_FULL, state, app, byMonth, yearOf, postCardHtml, syncChrome } from "./core.js";
+import { MONTHS_FULL, state, app, byMonth, yearOf, dayOf, postCardHtml, syncChrome } from "./core.js";
 
 export function renderMonth(m) {
   state.view = "month"; state.month = m;
-  const posts = byMonth(m).slice().sort((a, b) => a.date.localeCompare(b.date));
+  // Without the year split, order by day of month (then year): the card
+  // labels show only day + month, so a plain chronological sort makes the
+  // days reset at every year boundary and look unordered. With the split,
+  // each year group stays chronological.
+  const posts = byMonth(m).slice().sort(state.spanByYear
+    ? (a, b) => a.date.localeCompare(b.date)
+    : (a, b) => dayOf(a) - dayOf(b) || a.date.localeCompare(b.date));
   let body = "";
   if (state.spanByYear) {
     const years = [...new Set(posts.map(yearOf))].sort();
