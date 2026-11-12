@@ -84,29 +84,31 @@ They are hosted on the droplet and linked from here:
 
 - Base URL: the `GALLERY_BASE` constant in `js/core.js`
   (currently `https://gadi-plants.duckdns.org`).
-- Photo URL: `<base>/galleries/<post_id>/NN.jpg` — the pointer is derived
-  from the post's own id; nothing else needs to be kept in sync.
-- Index: the app fetches `<base>/galleries/galleries.json` lazily on first
-  open. Shape: `{ "<post_id>": { "photo_count": N, "files": ["01.jpg", …],
+- Photo URL: `<base>/galleries/<year>/<post_id>/NN.jpg` — the pointer is
+  derived from the post's own id and year; nothing else needs to be kept
+  in sync.
+- Index: the app fetches `<base>/galleries/<year>/galleries.json` lazily
+  on first open of a post from that year (cached per year for the page
+  view). Shape: `{ "<post_id>": { "photo_count": N, "files": ["01.jpg", …],
   "captions": { "01.jpg": "…", … } } }`. The index is generated from the
   collection manifest and uploaded to the droplet together with the photos,
   so the two can never drift apart.
 - The gallery host's web server must send `Access-Control-Allow-Origin`
-  for `galleries.json` (plain `<img>` loads need no CORS; the JSON fetch
-  does). With nginx, add an exact-match location inside the server block
-  that serves the galleries, then test and reload
-  (`nginx -t`, `systemctl reload nginx`):
+  for each year's `galleries.json` (plain `<img>` loads need no CORS; the
+  JSON fetch does). With nginx, add one prefix location inside the server
+  block that serves the galleries — it covers every year's index — then
+  test and reload (`nginx -t`, `systemctl reload nginx`):
 
   ```nginx
-  location = /galleries/galleries.json {
+  location /galleries/ {
       add_header Access-Control-Allow-Origin *;
   }
   ```
 
-  Only the index file needs the header, and `*` is fine — the data is
+  Only the index files need the header, and `*` is fine — the data is
   public and read-only. It is safe to add before the `galleries/` folder
   exists on the host; on another server, set the equivalent header for
-  that one path.
+  that path.
 - If the droplet is unreachable, or a post has no index entry yet, the
   popup opens with an empty state and the rest of the site is unaffected.
   Moving `posts.json` itself to the droplet was rejected on purpose: the
