@@ -3,29 +3,40 @@
    time, its caption below, prev/next via buttons, keyboard and swipe.
 
    Photos are hosted on the droplet (see GALLERY_BASE in core.js); the
-   in-package site only carries one thumbnail per post. The gallery
-   index (galleries.json) is fetched lazily on first open:
+   in-package site only carries one thumbnail per post. Galleries are
+   split by year: the index for a year lives at
+   `galleries/<year>/galleries.json`, fetched lazily on first open of a
+   post from that year (and cached per year for the page view):
      { "<post_id>": { "photo_count": N,
                       "files": ["01.jpg", ...],
                       "captions": { "01.jpg": "...", ... } } }
-   Photo URL for a file: `${GALLERY_BASE}/galleries/<post_id>/<file>`.
+   Photo URL for a file:
+   `${GALLERY_BASE}/galleries/<year>/<post_id>/<file>`.
    Until a post has an entry (or the droplet is unreachable), its
    gallery opens with an empty state.
 
    The popup is deep-linkable: #/gallery/<post_id>/<n> (1-based). The
    browser Back button closes it. */
 
-import { state, GALLERY_BASE } from "./core.js";
+import { state, GALLERY_BASE, yearOf } from "./core.js";
 
 let overlay, imgEl, emptyEl, captionEl, counterEl, prevBtn, nextBtn;
-let current = null;          // { postId, photos: [{file, caption}], index }
+let current = null;          // { postId, year, photos: [{file, caption}], index }
 let ownsHistoryEntry = false;
 let built = false;
 
-const photoUrl = (postId, file) => `${GALLERY_BASE}/galleries/${postId}/${file}`;
+/* The year of a post, from its date in posts.json — this is what
+   decides which per-year index and photo folder to use. */
+const yearFor = (postId) => {
+  const post = state.posts.find((p) => p.id === postId);
+  return post ? yearOf(post) : null;
+};
+
+const photoUrl = (year, postId, file) => `${GALLERY_BASE}/galleries/${year}/${postId}/${file}`;
 
 function photosOf(postId) {
-  const entry = state.galleries && state.galleries[postId];
+  const year = yearFor(postId);
+  const entry = year !== null && state.galleries[year] ? state.galleries[year][postId] : null;
   if (!entry) return [];
   const files = entry.files && entry.files.length
     ? entry.files
@@ -33,20 +44,20 @@ function photosOf(postId) {
   return files.map((file) => ({ file, caption: (entry.captions && entry.captions[file]) || "" }));
 }
 
-function loadGalleries() {
-  if (state.galleries !== undefined) return;
-  state.galleries = null; // mark "fetching" so parallel opens don't refetch
-  fetch(`${GALLERY_BASE}/galleries/galleries.json`)
+function loadGalleries(year) {
+  if (year === null || state.galleries[year] !== undefined) return;
+  state.galleries[year] = null; // mark "fetching" so parallel opens don't refetch
+  fetch(`${GALLERY_BASE}/galleries/${year}/galleries.json`)
     .then((r) => (r.ok ? r.json() : null))
     .then((data) => {
-      state.galleries = data || {};
-      if (current) { // refresh the open gallery now that data arrived
+      state.galleries[year] = data || {};
+      if (current && current.year === year) { // refresh the open gallery now that data arrived
         const idx = current.index;
         current.photos = photosOf(current.postId);
         show(Math.min(idx, Math.max(0, current.photos.length - 1)), false);
       }
     })
-    .catch(() => { state.galleries = {}; });
+    .catch(() => { state.galleries[year] = {}; });
 }
 
 function build() {
@@ -120,11 +131,11 @@ function show(index, updateHash = true) {
   counterEl.textContent = has ? `${current.index + 1} / ${photos.length}` : "";
   if (has) {
     const photo = photos[current.index];
-    imgEl.src = photoUrl(current.postId, photo.file);
+    imgEl.src = photoUrl(current.year, current.postId, photo.file);
     imgEl.alt = photo.caption || "";
     captionEl.textContent = photo.caption;
     for (const n of [current.index - 1, current.index + 1]) { // preload neighbours
-      if (n >= 0 && n < photos.length) { const pre = new Image(); pre.src = photoUrl(current.postId, photos[n].file); }
+      if (n >= 0 && n < photos.length) { const pre = new Image(); pre.src = photoUrl(current.year, current.postId, photos[n].file); }
     }
   } else {
     captionEl.textContent = "";
@@ -146,8 +157,9 @@ function hide() {
 
 export function openGallery(postId, index = 0) {
   build();
-  loadGalleries();
-  current = { postId, photos: photosOf(postId), index: 0 };
+  const year = yearFor(postId);
+  loadGalleries(year);
+  current = { postId, year, photos: photosOf(postId), index: 0 };
   overlay.hidden = false;
   document.body.style.overflow = "hidden";
   history.pushState(null, "", `#/gallery/${postId}/${index + 1}`);

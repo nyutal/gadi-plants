@@ -7,11 +7,13 @@ export const MONTHS_FULL = ["ינואר","פברואר","מרץ","אפריל","�
 export const MONTHS_ABBR = ["ינו׳","פבר׳","מרץ","אפר׳","מאי","יוני","יולי","אוג׳","ספט׳","אוק׳","נוב׳","דצמ׳"];
 
 /* Full photo galleries live on the droplet, not in this package (only the
-   one thumbnail per post is here). Gallery photos are served from
-   `${GALLERY_BASE}/galleries/<post_id>/NN.jpg`, and the gallery index
-   (photo lists + per-photo captions, keyed by post id) from
-   `${GALLERY_BASE}/galleries/galleries.json`. If the droplet is
-   unreachable the site works as before, with empty galleries. */
+   one thumbnail per post is here). Galleries are split by year: gallery
+   photos are served from `${GALLERY_BASE}/galleries/<year>/<post_id>/NN.jpg`,
+   and the gallery index (photo lists + per-photo captions, keyed by post
+   id) for a year from `${GALLERY_BASE}/galleries/<year>/galleries.json`.
+   The site fetches only the index of the year it needs, lazily, on first
+   open of a post from that year. If the droplet is unreachable the site
+   works as before, with empty galleries. */
 export const GALLERY_BASE = "https://gadi-plants.duckdns.org";
 
 export const state = {
@@ -21,7 +23,7 @@ export const state = {
   plant: null,         // plant name when view === "plant"
   spanByYear: false,   // month view: group posts by year
   indexMonth: 0,       // index filter: 0 = whole year, else 1..12
-  galleries: undefined, // gallery index: undefined = not fetched yet, null = unavailable, else {postId: entry}
+  galleries: {},       // per-year gallery index: { [year]: {postId: entry} | null }; null = fetching that year
 };
 
 export const app = document.getElementById("app");
