@@ -8,7 +8,7 @@
 import { state, app, backBtn, tabTimeline, tabIndex } from "./core.js";
 import { renderYear } from "./year.js";
 import { renderIndex } from "./plant-index.js";
-import { initGallery } from "./gallery.js";
+import { initGallery, preloadGalleries } from "./gallery.js";
 
 /* ---------------- chrome: tabs, back button, swipe ---------------- */
 
@@ -39,5 +39,17 @@ document.addEventListener("touchend", (e) => {
 
 fetch("data/posts.json")
   .then((r) => r.json())
-  .then((posts) => { state.posts = posts; renderYear(); initGallery(); })
+  .then(async (posts) => {
+    state.posts = posts;
+    /* Load the gallery indexes together with the posts, before the first
+       render, so the gallery state is full from the start. The timeout
+       keeps an unreachable gallery host from ever blocking the timeline:
+       after 5s we render anyway, and any index that arrives late still
+       lands in state (and refreshes an open gallery). */
+    await Promise.race([
+      preloadGalleries(),
+      new Promise((resolve) => setTimeout(resolve, 5000)),
+    ]);
+    renderYear(); initGallery();
+  })
   .catch(() => { app.innerHTML = `<p class="empty">שגיאה בטעינת הנתונים</p>`; });

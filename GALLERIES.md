@@ -197,9 +197,14 @@ Then verify:
 
 ## Behaviour when the blob is missing or unreachable
 
-The index for a year is fetched lazily, the first time a gallery from
-that year is opened. If the fetch fails (host down, network blocked),
-the timeline still renders fully and every gallery opens with the empty
-state. The empty result is cached for the current page view, per year;
-a refresh retries. No site change is needed when a new blob goes live —
-the popup lights up on its own.
+The indexes are loaded at boot, together with posts.json and before the
+first render, so the gallery state is full from the start. Only the
+index state is loaded up front, never the photos. A timeout (5s) keeps
+an unreachable gallery host from ever blocking the timeline: if the
+indexes haven't arrived by then, the timeline renders anyway and any
+index that arrives late still lands in state (and refreshes an open
+gallery). If the fetch fails (host down, network blocked), the timeline
+still renders fully and every gallery opens with the empty state. The
+empty result is cached for the current page view, per year; a refresh
+retries. No site change is needed when a new blob goes live — the popup
+lights up on its own.

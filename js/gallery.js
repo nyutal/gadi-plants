@@ -15,6 +15,13 @@
    Until a post has an entry (or the droplet is unreachable), its
    gallery opens with an empty state.
 
+   The indexes are also loaded up front: at boot, together with
+   posts.json and before the first render, the index of every year in
+   the timeline is fetched into state, so a gallery opens with its
+   photos right away. Only the index state is loaded up front — photos
+   are never fetched until their gallery is open (the current photo
+   plus its neighbours).
+
    The popup is deep-linkable: #/gallery/<post_id>/<n> (1-based). The
    browser Back button closes it. */
 
@@ -44,10 +51,13 @@ function photosOf(postId) {
   return files.map((file) => ({ file, caption: (entry.captions && entry.captions[file]) || "" }));
 }
 
+const pending = {}; // year -> in-flight index fetch promise
+
 function loadGalleries(year) {
-  if (year === null || state.galleries[year] !== undefined) return;
+  if (year === null) return Promise.resolve();
+  if (state.galleries[year] !== undefined) return pending[year] || Promise.resolve();
   state.galleries[year] = null; // mark "fetching" so parallel opens don't refetch
-  fetch(`${GALLERY_BASE}/galleries/${year}/galleries.json`)
+  pending[year] = fetch(`${GALLERY_BASE}/galleries/${year}/galleries.json`)
     .then((r) => (r.ok ? r.json() : null))
     .then((data) => {
       state.galleries[year] = data || {};
@@ -58,6 +68,16 @@ function loadGalleries(year) {
       }
     })
     .catch(() => { state.galleries[year] = {}; });
+  return pending[year];
+}
+
+/* Load every year's index into state, up front at boot (called from
+   app.js before the first render). Index state only — photos are never
+   preloaded. Years with no gallery yet just 404 and cache empty until
+   their blob goes live. Resolves when all fetches settle. */
+export function preloadGalleries() {
+  const years = [...new Set(state.posts.map((p) => yearOf(p)))];
+  return Promise.all(years.map((y) => loadGalleries(y)));
 }
 
 function build() {
