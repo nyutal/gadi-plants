@@ -10,6 +10,9 @@
      { "<post_id>": { "photo_count": N,
                       "files": ["01.jpg", ...],
                       "captions": { "01.jpg": "...", ... } } }
+   The 2026 index is that dict; the 2019–2025 indexes are lists of
+   entries instead (the pipeline built them that way). loadGalleries
+   normalizes a list into the dict form above, so both shapes work.
    Photo URL for a file:
    `${GALLERY_BASE}/galleries/<year>/<post_id>/<file>`.
    Until a post has an entry (or the droplet is unreachable), its
@@ -53,6 +56,26 @@ function photosOf(postId) {
 
 const pending = {}; // year -> in-flight index fetch promise
 
+/* Gallery indexes come in two shapes: the 2026 index is a dict keyed by
+   post id, while the 2019–2025 indexes are lists of entries (the pipeline
+   built them that way). Normalize a list into the dict shape the rest of
+   the gallery code expects; dicts pass through unchanged. */
+function normalizeGalleries(data) {
+  if (!data) return {};
+  if (!Array.isArray(data)) return data;
+  const byId = {};
+  for (const e of data) {
+    const pid = e.fb_post_id || e.id;
+    if (!pid) continue;
+    byId[pid] = {
+      photo_count: e.photo_count || e.photos || 0,
+      files: e.files && e.files.length ? e.files : Object.keys(e.captions || {}),
+      captions: e.captions || {},
+    };
+  }
+  return byId;
+}
+
 function loadGalleries(year) {
   if (year === null) return Promise.resolve();
   if (state.galleries[year] !== undefined) return pending[year] || Promise.resolve();
@@ -60,7 +83,7 @@ function loadGalleries(year) {
   pending[year] = fetch(`${GALLERY_BASE}/galleries/${year}/galleries.json`)
     .then((r) => (r.ok ? r.json() : null))
     .then((data) => {
-      state.galleries[year] = data || {};
+      state.galleries[year] = normalizeGalleries(data);
       if (current && current.year === year) { // refresh the open gallery now that data arrived
         const idx = current.index;
         current.photos = photosOf(current.postId);
