@@ -4,12 +4,15 @@ Implementation plan for the design in `SEARCH-DESIGN.md` (PR #11).
 
 One diff per PR, stacked in order, each merged before the next starts.
 Each diff is one cohesive unit, leaves the site working, and carries
-its own tests. Diffs 1–5 add tested modules with no user-visible
-change; the feature becomes visible only in diff 6. No new tooling:
+its own tests. Diffs 1–8 add tested modules with no user-visible
+change; the feature becomes visible only in diff 9. No new tooling:
 tests are plain Node scripts under `tools/`, run with
 `node tools/<name>.test.mjs`, using `node:assert/strict`, exiting
 non-zero on failure. No test framework, no build step, no CI — same
 as the rest of the repo. Vendored code is excluded from the LOC counts.
+
+Each field builder lives in its own diff: one class, one field, one
+reviewable unit.
 
 ## Diff 1 — Vendor MiniSearch + engine skeleton
 
@@ -34,17 +37,44 @@ as the rest of the repo. Vendored code is excluded from the LOC counts.
 - **LOC:** ~25 code / ~70 test. **Done when:** test green, site
   unchanged.
 
-## Diff 3 — DocumentBuilder + enrichers
+## Diff 3 — DocumentBuilder + PlantFieldBuilder
 
-- **Files:** `js/search-docs.js` (shared `ctx`, the 4 enrichers,
-  builder merge, design §5); `tools/search-docs.test.mjs`.
-- **Tests:** fixture post → exact document shape (design §4); post
-  without `galleryEntry` → `captions: ''`; post with `galleryEntry`
-  → captions joined; `dateTerms` format.
-- **LOC:** ~110 code / ~90 test. **Done when:** test green, site
+- **Files:** `js/search-docs.js` (shared `ctx`, builder merge,
+  registration, `PlantFieldBuilder`, design §5);
+  `tools/search-docs.test.mjs`.
+- **Tests:** fixture post → document with the `plants` field;
+  builder passes the same `ctx` to the field builder; registration
+  wires a field builder into the builder.
+- **LOC:** ~85 code / ~70 test. **Done when:** test green, site
   unchanged.
 
-## Diff 4 — QueryParser (dates)
+## Diff 4 — PostTextFieldBuilder
+
+- **Files:** `js/search-docs.js` (add `PostTextFieldBuilder`);
+  `tools/search-text-field.test.mjs`.
+- **Tests:** `ctx.post.text` → `text` field; empty text → `''`.
+- **LOC:** ~10 code / ~30 test. **Done when:** test green, site
+  unchanged.
+
+## Diff 5 — DateFieldBuilder
+
+- **Files:** `js/search-docs.js` (add `DateFieldBuilder`, design §7);
+  `tools/search-date-field.test.mjs`.
+- **Tests:** `post.date` → `dateTerms` format (`y2020 m03 d29 מרץ`);
+  Hebrew month name included; zero-padded month and day.
+- **LOC:** ~20 code / ~40 test. **Done when:** test green, site
+  unchanged.
+
+## Diff 6 — CaptionFieldBuilder
+
+- **Files:** `js/search-docs.js` (add `CaptionFieldBuilder`, design
+  §5, §9); `tools/search-captions-field.test.mjs`.
+- **Tests:** `ctx.galleryEntry` captions → `captions` field, joined;
+  post without `galleryEntry` → `captions: ''`.
+- **LOC:** ~20 code / ~40 test. **Done when:** test green, site
+  unchanged.
+
+## Diff 7 — QueryParser (dates)
 
 - **Files:** `js/search-query.js` (date formats, ambiguous `03/25` →
   two variants, design §7); `tools/search-query.test.mjs`.
@@ -54,7 +84,7 @@ as the rest of the repo. Vendored code is excluded from the LOC counts.
 - **LOC:** ~80 code / ~110 test. **Done when:** test green, site
   unchanged.
 
-## Diff 5 — SearchEngine: index build, boot, incremental captions
+## Diff 8 — SearchEngine: index build, boot, incremental captions
 
 - **Files:** `js/search.js` (engine: build from `posts.json` docs,
   `search()`, re-sort newest-first, `updateCaptions(year, index)`
@@ -66,7 +96,7 @@ as the rest of the repo. Vendored code is excluded from the LOC counts.
 - **LOC:** ~90 code / ~120 test. **Done when:** test green, site
   unchanged.
 
-## Diff 6 — SearchUI + wiring
+## Diff 9 — SearchUI + wiring
 
 - **Files:** `js/search-ui.js` (header input, results reuse post
   cards, count + clear, captions-not-indexed note), `js/app.js`
@@ -81,10 +111,11 @@ as the rest of the repo. Vendored code is excluded from the LOC counts.
 - **LOC:** ~120 code / ~30 CSS. **Done when:** checklist passes,
   site works.
 
-## Diff 7 — Docs + release verification
+## Diff 10 — Docs + release verification
 
 - **Files:** `README.md` (one-line pointer to the design doc);
-  `SEARCH-DESIGN.md` (status → Implemented, link the 6 PRs).
+  `SEARCH-DESIGN.md` (status → Implemented, link the 9
+  implementation PRs).
 - **Verification (not code):** GitHub Pages preview + droplet end to
   end, including a non-2026 year and a caption search; note the
   result in the PR.
@@ -94,7 +125,7 @@ as the rest of the repo. Vendored code is excluded from the LOC counts.
 
 | | Code | Tests | CSS | Docs |
 |---|---|---|---|---|
-| Diffs 1–7 | ~465 | ~440 | ~30 | ~15 |
+| Diffs 1–10 | ~490 | ~530 | ~30 | ~15 |
 
 Deliberately not in this plan: a test framework, a build step, CI,
 fuzzy search, synonyms, stopword removal — each is a separate
