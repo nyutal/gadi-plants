@@ -21,7 +21,21 @@ export class PostTextFieldBuilder {
   }
 }
 
-export const FIELD_BUILDERS = [new PlantFieldBuilder(), new PostTextFieldBuilder()];
+/* Hebrew month names, mirroring MONTHS_FULL in core.js — kept here (not
+   imported) so this module stays free of the DOM and testable in Node. */
+const HE_MONTHS = ['ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני', 'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'];
+
+export class DateFieldBuilder {
+  field = 'dateTerms';
+  /* '2020-03-29' → 'y2020 m03 d29 מרץ': namespaced tokens, so a month
+     can never collide with a day or a word. */
+  build(ctx) {
+    const [y, m, d] = ctx.post.date.split('-').map(Number);
+    return `y${y} m${String(m).padStart(2, '0')} d${String(d).padStart(2, '0')} ${HE_MONTHS[m - 1]}`;
+  }
+}
+
+export const FIELD_BUILDERS = [new PlantFieldBuilder(), new PostTextFieldBuilder(), new DateFieldBuilder()];
 
 /* The shared high-level context: the post plus its gallery entry (null
    when the post has no gallery yet). Every field builder pulls what it
