@@ -65,7 +65,7 @@ One document per post:
 ```js
 {
   id: '1431947860318705',          // fb_post_id
-  plants: 'נורית סביון דרדר גדילן', // headline plants, space-separated
+  plants: 'נורית סביון דרדר גדילן', // headline plants: the post's plants array, joined with spaces
   text: '…',                        // post caption
   captions: '…',                    // all gallery captions for the post,
                                     // space-separated (see §9)
@@ -102,13 +102,18 @@ DocumentBuilder ── one shared high-level context per post:
 
 | Field builder | Pulls from | Returns |
 |---|---|---|
-| `PlantFieldBuilder` | `ctx.post.plants` | `plants` |
-| `PostTextFieldBuilder` | `ctx.post.text` | `text` |
+| `PlantFieldBuilder` | `ctx.post.plants` (array, joined) | `plants` |
+| `PostTextFieldBuilder` | `ctx.post.caption` | `text` |
 | `DateFieldBuilder` | `ctx.post.date` | `dateTerms` |
 | `CaptionFieldBuilder` | `ctx.galleryEntry?.captions` | `captions` |
 
 The tokenizer/normalizer is a **shared module, not part of `ctx`**
 (month names live inside `DateFieldBuilder`, not in the context).
+
+Two corrections against the real `posts.json` shape, verified during
+implementation: `PlantFieldBuilder` joins the `plants` **array** with
+spaces, and `PostTextFieldBuilder` reads `post.caption` — the post has
+no `text` field.
 
 **MiniSearch config:**
 
