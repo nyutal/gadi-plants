@@ -1,7 +1,9 @@
 # Post search — design
 
-**Status:** Proposed (2026-11-20). Design doc only — no code in this PR.
-Implementation follows in a separate PR after review.
+**Status:** Implemented (2026-11-20). Implementation in PRs #13–#21, following the
+execution plan in PR #12: #13 vendor MiniSearch + engine skeleton, #14 tokenizer,
+#15 DocumentBuilder + PlantFieldBuilder, #16 PostTextFieldBuilder, #17 DateFieldBuilder,
+#18 CaptionFieldBuilder, #19 QueryParser, #20 SearchEngine, #21 SearchUI + wiring.
 
 ## 1. Problem
 
@@ -123,7 +125,7 @@ new MiniSearch({
   storeFields: ['date'],
   tokenize, processTerm,              // §6
   searchOptions: {
-    prefix: true,
+    prefix: (term, i, terms) => i === terms.length - 1,  // last word only (§13)
     fuzzy: false,
     combineWith: 'AND',
     boost: { plants: 3, text: 2, captions: 1, dateTerms: 2 },
@@ -299,7 +301,7 @@ with `plant.js`, `month.js`, `year.js`).
 ## 14. Rollout
 
 1. This PR: design doc only.
-2. Next PR: implementation per this doc.
+2. Implementation: PRs #13–#21, per the execution plan in PR #12.
 3. Verify on the GitHub Pages preview and on the droplet, end to end —
    including a non-2026 year and a caption search — before merging.
    A 200 on a file does not prove the site can use it.

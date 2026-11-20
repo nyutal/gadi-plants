@@ -21,6 +21,13 @@ site/
 │   ├── plant-index.js  Plant index view (A–ב)
 │   ├── plant.js      Single-plant view
 │   └── gallery.js    Gallery popup (lightbox) for a post's full photo set
+│   ├── search.js     Search engine (MiniSearch) + SearchEngine wrapper
+│   ├── search-docs.js  DocumentBuilder + field builders
+│   ├── search-text.js  Tokenizer + normalizer
+│   ├── search-query.js QueryParser (dates)
+│   ├── search-ui.js  Header input + results rendering
+│   └── vendor/
+│       └── minisearch.js  Vendored MiniSearch 7.2.0 (no dependency)
 ├── data/
 │   └── posts.json    GENERATED — the posts data (see schema below)
 └── images/
@@ -113,6 +120,13 @@ They are hosted on the droplet and linked from here:
   popup opens with an empty state and the rest of the site is unaffected.
   Moving `posts.json` itself to the droplet was rejected on purpose: the
   timeline must keep working even where/when the droplet cannot be reached.
+
+## Search
+
+Client-side, index-based, exact (not fuzzy) search over headline plants,
+post text, gallery captions and dates — MiniSearch, vendored, no build
+step. Design: `SEARCH-DESIGN.md`; execution plan: `SEARCH-EXECUTION-PLAN.md`.
+Run the tests with `node tools/<name>.test.mjs`.
 
 ## Design notes (keep these intact when editing)
 
