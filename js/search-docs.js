@@ -13,7 +13,15 @@ export class PlantFieldBuilder {
   }
 }
 
-export const FIELD_BUILDERS = [new PlantFieldBuilder()];
+export class PostTextFieldBuilder {
+  field = 'text';
+  /* The post's free text lives in `caption` — there is no `text` field. */
+  build(ctx) {
+    return ctx.post.caption || '';
+  }
+}
+
+export const FIELD_BUILDERS = [new PlantFieldBuilder(), new PostTextFieldBuilder()];
 
 /* The shared high-level context: the post plus its gallery entry (null
    when the post has no gallery yet). Every field builder pulls what it
