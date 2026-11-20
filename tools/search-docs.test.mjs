@@ -20,9 +20,12 @@ check('PlantFieldBuilder joins the plants array', () => {
 });
 
 check('buildDocument returns id, date and the plants field', () => {
-  assert.deepEqual(buildDocument(post), {
-    id: 'p1', date: '2020-03-29', plants: 'רקפת כלנית',
-  });
+  // Individual assertions, not an exact object: later diffs add more
+  // fields to the document, and this test must not break when they do.
+  const doc = buildDocument(post);
+  assert.equal(doc.id, 'p1');
+  assert.equal(doc.date, '2020-03-29');
+  assert.equal(doc.plants, 'רקפת כלנית');
 });
 
 check('the builder passes the same ctx to every field builder', () => {
