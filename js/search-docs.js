@@ -35,7 +35,19 @@ export class DateFieldBuilder {
   }
 }
 
-export const FIELD_BUILDERS = [new PlantFieldBuilder(), new PostTextFieldBuilder(), new DateFieldBuilder()];
+export class CaptionFieldBuilder {
+  field = 'captions';
+  /* All gallery captions for the post, space-separated. A post with no
+     gallery entry yet (that year's index hasn't loaded) contributes
+     nothing. */
+  build(ctx) {
+    const captions = ctx.galleryEntry?.captions;
+    if (!captions) return '';
+    return Object.values(captions).filter(Boolean).join(' ');
+  }
+}
+
+export const FIELD_BUILDERS = [new PlantFieldBuilder(), new PostTextFieldBuilder(), new DateFieldBuilder(), new CaptionFieldBuilder()];
 
 /* The shared high-level context: the post plus its gallery entry (null
    when the post has no gallery yet). Every field builder pulls what it
