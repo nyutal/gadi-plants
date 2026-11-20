@@ -84,8 +84,8 @@ posts.json + per-year gallery indexes
         ▼
 DocumentBuilder ── one shared high-level context per post:
         │          ctx = { post, galleryEntry }
-        │          calls every enricher with the SAME ctx;
-        │          each enricher pulls what it needs, returns its field;
+        │          calls every field builder with the SAME ctx;
+        │          each field builder pulls what it needs, returns its field;
         │          builder merges into the document (§4)
         ▼
    MiniSearch ── fields + boosts, custom tokenize/processTerm,
@@ -98,17 +98,17 @@ DocumentBuilder ── one shared high-level context per post:
                  result count + clear button
 ```
 
-**Enrichers** (each takes `ctx`, returns one field):
+**Field builders** (each takes `ctx`, returns one field):
 
-| Enricher | Pulls from | Returns |
+| Field builder | Pulls from | Returns |
 |---|---|---|
-| `PlantEnricher` | `ctx.post.plants` | `plants` |
-| `PostTextEnricher` | `ctx.post.text` | `text` |
-| `DateEnricher` | `ctx.post.date` | `dateTerms` |
-| `CaptionEnricher` | `ctx.galleryEntry?.captions` | `captions` |
+| `PlantFieldBuilder` | `ctx.post.plants` | `plants` |
+| `PostTextFieldBuilder` | `ctx.post.text` | `text` |
+| `DateFieldBuilder` | `ctx.post.date` | `dateTerms` |
+| `CaptionFieldBuilder` | `ctx.galleryEntry?.captions` | `captions` |
 
 The tokenizer/normalizer is a **shared module, not part of `ctx`**
-(month names live inside `DateEnricher`, not in the context).
+(month names live inside `DateFieldBuilder`, not in the context).
 
 **MiniSearch config:**
 
@@ -126,9 +126,9 @@ new MiniSearch({
 });
 ```
 
-**Extension rule:** a new source means a new `Enricher` class, register
+**Extension rule:** a new source means a new `FieldBuilder` class, register
 it in the builder, and add its field to the MiniSearch config. Nothing
-else changes.
+else changes. One field builder builds exactly one field of the document — that 1:1 mapping is the contract the builder relies on.
 
 ## 6. Tokenizer and normalizer
 
@@ -166,7 +166,7 @@ term per word, normalized in `processTerm`, is the correct shape.
 
 ## 7. Dates
 
-`DateEnricher` turns `post.date` into one space-separated string of
+`DateFieldBuilder` turns `post.date` into one space-separated string of
 namespaced tokens:
 
 ```js
@@ -234,7 +234,7 @@ score — is the primary order for this timeline.
 - **Captions:** captions live in the per-year gallery indexes on the
   droplet, which load separately (`preloadGalleries` / `loadGalleries`,
   existing code). When a year's index arrives, the builder runs the
-  `CaptionEnricher` pass for those posts and re-adds the documents —
+  `CaptionFieldBuilder` pass for those posts and re-adds the documents —
   414 documents, a full rebuild is milliseconds.
 - Until a year's gallery index loads, that year's posts are searchable
   without captions. The UI notes when captions aren't indexed yet, so
@@ -269,7 +269,7 @@ approach end to end before this doc was written:
 js/
   search.js        MiniSearch setup, tokenizer/normalizer,
                    QueryParser, SearchEngine
-  search-docs.js   DocumentBuilder + enrichers
+  search-docs.js   DocumentBuilder + field builders
   search-ui.js     header input, results rendering (reuse post cards),
                    result count + clear button
   vendor/
